@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block body %}
+	
+	<article>
+		<div class="container">	
+
+			<div class="main-title">
+			
+				CHECK BALANCE
+			
+			</div>
+		<form method="post" action="/balance/check">	
+		<div class="period"> 
+			<select id="chooseBalancePeriod" name="chooseBalancePeriod" class="chooseBalancePeriod" style="cursor: pointer;" onchange="choosingPeriod()" >
+				<option value="1" 
+				{%  if balancePeriod=="1" %} selected="selected" {%endif%}
+				>actual month</option>
+				<option value="2" 
+				{%  if balancePeriod=="2" %} selected="selected" {%endif%}
+				>previous month</option>
+				<option value="3"
+				{%  if balancePeriod=="3" %} selected="selected" {%endif%}
+				>actual year</option>
+				<option value="4"
+				{%  if balancePeriod=="4" %} selected="selected" {%endif%}
+				>choose period</option>
+				
+			</select>
+			<input type="submit" name="submit" value="choose">
+		</div>
+		
+		{% if balancePeriod ==4 %}
+	
+			<div class="col-12 ">
+			<div class ="col-12">
+			<div class="fieldsets inline ">
+			<fieldset class="field_set2 inline ">
+			<legend><b>FROM</b></legend>
+			<input type="date" id="StartDate" name="startdate" class="inputAmountDate" onchange="choosingStart()" value="{{ chosen_dates.startdate }}" />
+			
+					</fieldset>
+				<fieldset class="field_set2 inline">
+						<legend><b>TO</b></legend>
+						<input type="date" id="EndDate" name="enddate" class="inputAmountDate" onchange="choosingEnd()" value= "{{ chosen_dates.enddate }}" />
+						
+					</fieldset>
+					</div"> 
+				</div>
+			
+		</div">
+
+			<div class="row col-12">
+				<div class="period-dates" id="period-dates-2 inline">				
+					
+				</div">
+			</div>
+		{% endif %}
+		</form>
+			
+			<div id="result"></div>
+				<div class="row col-12">
+				
+					<div  class="table-transactions table col-md-6">
+					
+					<div class="title-of-category"> 
+						<!--<h5>PRZYCHODY</h5>-->
+				
+						<input type="button" style="cursor: pointer;" name="view" data-toggle="modal5" data-target="#dataModal5" value="INCOMES" id="all_incomes" class="btn btn-secondary btn-lg btn-rounded view_allIncomes">
+						</br>
+						
+						
+						{% if (incomesDates is defined) and (not incomesDates is empty) %}
+									
+										<table class="table-with-modal">
+							 <tr>
+										<th>Category</th>
+										<th>Amount</th> 
+							</tr>
+										{% for row in incomesDates %}
+										
+											
+											<tr   data-id="{{row.name}}" id="{{row.name}}" >
+											<td width="50%"><input type="button" data-toggle="modal2" data-target="#dataModal2" style="cursor: pointer; width: 100%; background-color: none;" name="view" value="{{row.name}}" id="{{row.name}}" class="btn view_incomes"></td> 
+											<td width="50%">{{row.amount}}</td>
+											
+											</tr>
+											
+										{% endfor %}
+										</table>
+										{% endif %}
+					</div>
+					</br>
+					
+					{% if (incomesSummary is defined) and (not incomesSummary is empty) %}
+
+							<div class="balanceSum" style="color:black">
+							
+							{% for row in incomesSummary %}
+								{% if row.sum > 0 %}
+								<b>SUM = {{row.sum}}</b>
+								{% endif %}
+							{% endfor %}
+							</div>
+							
+							<div id="piechart"></div>
+							
+					{% endif %}
+					
+					</div>
+					
+					<div class="table-transactions table col-md-6">
+					
+						<div class="title-of-category"> 
+							<!--<h5>WYDATKI</h5>-->
+							<input type="button" style="cursor: pointer;" name="view" data-toggle="modal3" data-target="#dataModal3" value="EXPENSES" id="all_expenses" class="btn btn-secondary btn-lg btn-rounded view_allExpenses">
+							</br>
+							
+							{% if (expensesDates is defined) and (not expensesDates is empty) %}
+									
+										<table class="table-with-modal">
+							 <tr>
+										<th>Category</th>
+										<th>Amount</th> 
+							</tr>
+										{% for row in expensesDates %}
+		
+											<tr   data-id="{{row.name}}" id="{{row.name}}" >
+											<td width="50%"><input type="button" data-toggle="modal4" data-target="#dataModal4" style="cursor: pointer; width: 100%; background-color: none;" name="view" value="{{row.name}}" id="{{row.name}}" class="btn view_expenses"></td> 
+											<td width="50%">{{row.amount}}</td>
+											
+											</tr>
+											
+										{% endfor %}
+										</table>
+										{% endif %}
+
+						</div>
+						</br>
+						
+						
+						
+						
+						{% if (expensesSummary is defined) and (not expensesSummary is empty) %}
+
+							<div class="balanceSum" style="color:black">
+							
+							{% for row in expensesSummary %}
+								{% if row.sum > 0 %}
+								<b>SUM = {{row.sum}}</b>
+								{% endif %}
+							{% endfor %}
+							</div>
+							
+							<div id="piechart2"></div>
+							
+						{% endif %}
+							  
+							</table>
+
+						
+					
+
+					</div>
+					
+					<div class="balanceSum col-12">
+									<b>BALANCE = 
+									{{balance}}
+									</b>
+						</div>
+								
+							<div class="balanceSum col-12">
+							{{balanceComment}}	
+						</div>
+					
+				</div>
+					
+		</div>
+	</article>
+	</br></br>
+	
+	<div id="dataModal" class="modal hide">  
+       <div class="modal-dialog">
+		<div class="modal-content">
+           
+                <div class="modal-header"  id="Category"></div>  
+                <div class="modal-body" id="incomes_detail"></div>  
+                <div class="modal-footer">  
+                     <button type="button" class="btn btn-default" data-dismiss="modal" >Zamknij</button>  
+                </div>  
+           </div>
+      </div>  
+ </div>  
+	
+<div id="dataModal2" class="modal hide">  
+     <div class="modal-dialog">
+		<div class="modal-content">
+           
+                <div class="modal-header"  id="Category2"></div>  
+                <div class="modal-body" id="expenses_detail"></div>  
+                <div class="modal-footer">  
+                     <button type="button" class="btn btn-default" data-dismiss="modal" >Zamknij</button>  
+                </div>  
+           </div>
+      </div>  
+ </div>  
+ 
+ <div id="dataModal3" class="modal hide">  
+     <div class="modal-dialog">
+		<div class="modal-content">
+           
+                <div class="modal-header"  id="allIncomes"></div>  
+                <div class="modal-body" id="allincomes_detail"></div>  
+                <div class="modal-footer">  
+                     <button type="button" class="btn btn-default" data-dismiss="modal" >Zamknij</button>  
+                </div>  
+           </div>
+      </div>  
+ </div>  
+ 
+ <div id="dataModal4" class="modal hide">  
+     <div class="modal-dialog">
+		<div class="modal-content">
+           
+                <div class="modal-header"  id="allExpenses"></div>  
+                <div class="modal-body" id="allexpenses_detail"></div>  
+                <div class="modal-footer">  
+                     <button type="button" class="btn btn-default" data-dismiss="modal" >Zamknij</button>  
+                </div>  
+           </div>
+      </div>  
+ </div>  
+ 
+ <div id="dataModal5" class="modal hide">  
+     <div class="modal-dialog">
+		<div class="modal-content">
+           
+                <div class="modal-header"  id="Category"></div>  
+                <div class="modal-body" id="incomes_detail"></div>  
+                <div class="modal-footer">  
+                     <button type="button" class="btn btn-default" data-dismiss="modal" >Zamknij</button>  
+                </div>  
+           </div>
+      </div>  
+ </div>  
+ 
+ {% endblock %}
+
+ {% block scripts %}
+
+ <script type="text/javascript">
+        $(document).ready(function() {
+            $('#chooseBalancePeriod').on('change', function() {
+                this.form.submit();
+            });
+        });
+</script>		
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+	
+		<script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+	
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+		
+          ['Category', 'Amount'],
+							{% for row in incomesPiechart %}
+								[' {{ row.name }} ', {{ row.amount }} ],
+							{% endfor %}
+							
+				]);			
+        var options = {
+		title: 'incomes',
+		backgroundColor: 'transparent',
+  
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+		
+        chart.draw(data, options);
+      }
+    </script>
+	
+	
+	<script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+	
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+		
+          ['Category', 'Amount'],
+		  {% for row in expensesPiechart %}
+								[' {{ row.name }} ', {{ row.amount }} ],
+							{% endfor %}	
+]);
+
+        var options = {
+		title: 'expenses',
+		backgroundColor: 'transparent',
+  
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart2'));
+		
+        chart.draw(data, options);
+      }
+    </script>
+
+ <!---
+function choosingPeriod() {
+	var chosenPeriod = document.getElementById("chooseBalancePeriod").value;
+	
+	$.ajax({
+					url:"balance",
+					method:"post",
+					data:{chosenPeriod:chosenPeriod},
+	});
+
+	location.reload();
+};
+
+function choosingStart(){
+	var chosenStart = document.getElementById("StartDate").value;
+	
+	$.ajax({
+					url:"balance",
+					method:"post",
+					data:{chosenStart:chosenStart},
+	});
+	//document.write(chosenStart);
+	location.reload();
+};
+
+function choosingEnd(){
+	var chosenEnd = document.getElementById("EndDate").value;
+	
+	$.ajax({
+					url:"balance",
+					method:"post",
+					data:{chosenEnd:chosenEnd},
+	});
+
+	location.reload();
+};
+*/
+ $(document).ready(function(){  
+      $('.view_expenses').click(function(){  
+				var expense_name = $(this).attr("id");
+			 $('#dataModal2').find('#Category2').html($('<b> Wybrana kategoria: ' + expense_name  + '</b>' + '<button type="button" class="close" data-dismiss="modal">&times;</button> '));
+			 
+				$.ajax({
+					url:"select2.php",
+					method:"post",
+					data:{expense_name:expense_name},
+					success:function(data){
+						$('#expenses_detail').html(data);
+						$('#dataModal2').modal("show");  
+					}
+				});
+		});
+});  
+
+
+ $(document).ready(function(){  
+      $('.view_incomes').click(function(){  
+				var income_name = $(this).attr("id");
+			 $('#dataModal').find('#Category').html($('<b> Wybrana kategoria: ' + income_name  + '</b>' + '<button type="button" class="close" data-dismiss="modal">&times;</button> '));
+			 
+				$.ajax({
+					url:"select.php",
+					method:"post",
+					data:{income_name:income_name},
+					success:function(data){
+						$('#incomes_detail').html(data);
+						$('#dataModal').modal("show");  
+					}
+				});
+		});
+});  
+
+
+ $(document).ready(function(){  
+      $('.view_allIncomes').click(function(){  
+				//var expense_name = $(this).attr("id");
+			 $('#dataModal3').find('#allIncomes').html($('<b> Wszystkie przychody </b>' + '<button type="button" class="close" data-dismiss="modal">&times;</button> '));
+				
+				
+				$.ajax({
+					url:"select3.php",
+					//method:"post",
+					//data:{expense_name:expense_name},
+					success:function(data){
+						$('#allincomes_detail').html(data);
+						$('#dataModal3').modal("show");  
+					}
+				});
+		});
+});  
+
+ $(document).ready(function(){  
+      $('.view_allExpenses').click(function(){  
+				//var expense_name = $(this).attr("id");
+			 $('#dataModal4').find('#allExpenses').html($('<b> Wszystkie wydatki </b>' + '<button type="button" class="close" data-dismiss="modal">&times;</button> '));
+				
+				
+				$.ajax({
+					url:"select4.php",
+					//method:"post",
+					//data:{expense_name:expense_name},
+					success:function(data){
+						$('#allexpenses_detail').html(data);
+						$('#dataModal4').modal("show");  
+					}
+				});
+		});
+});  
+
+ function sendPeriod()
+ {
+	 var chosenPeriod = $('#chooseBalancePeriod option:selected').attr("value").val();
+	 
+	 $post('selectPeriod.php', {chosenPeriod:chosenPeriod},function(data)
+		 {
+			 $('#result').html(data);
+		 });
+ }
+
+ </script>
+  -->
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>   
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>  
+ {% endblock %}
+ 

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Income{% endblock %}
+
+{% block body %}
+
+<article>	
+	<div class="container">	
+	
+		<div class="main-title">
+		ADD INCOME
+		</div>
+		
+		<form method="post" action="/income/add">
+			<div class="income-container col-md-12">
+				<div class="box col-md-3 table-transactions amountDate">
+					<fieldset class="field_set">
+						<legend><b>AMOUNT</b> 
+						</legend>				
+						<input type="number" min="0.01"  step="0.01" name="money" class="inputAmountDate" />
+					</fieldset>
+					
+					<fieldset class="field_set">
+						<legend><b>DATE</b></legend>
+						<input type="date" name="date" class="inputAmountDate" value="{{ today }}"						/>				
+					</fieldset>
+				</div>
+				
+				<div class="space" style="float:left;">
+				</div>	
+				
+				<div class="box col-md-5 category table-transactions column">
+					<fieldset class="field_set">
+						<legend class="name-of-area"><b>CATEGORY</b></legend>
+					</fieldset>
+					
+					{% for row in categories %}
+									
+						 
+										<div><label><input type="radio" value="{{row.id}}" name="income_type" 
+										
+										{% if loop.index == 1 %}
+											checked > {{row.name }}</label></div> 
+											
+										{% else %}
+											> {{ row.name }} </label></div> 
+											
+										{% endif %}
+										
+										{% if loop.index is divisible by(10)  %}
+													 </div> <div class="column col-xs-6">
+										{% endif %}
+									
+								{% endfor %}
+					
+				</div>
+					
+				<div class="space" style="float:left;">
+				</div>	
+				
+				<div class="box col-md-3 comment table-transactions">
+					<fieldset class="field_set ">
+						<legend></legend>
+						<label><br/>
+							<textarea placeholder="Add comment..." class=" textinput" name="comment" ></textarea>
+						</label><br/>
+					</fieldset>
+				</div>
+			</div>
+					
+			<div class="row col-12">
+				<div class="submitBox">
+					<input type="submit" name="submit" value="Add">
+					<a href="add-income.php"><input type="button" id="anuluj" value="Reset" >
+				</div>
+			</div>
+			
+		</form>
+		
+	</div>
+</article>
+<script> 
+console.log(  );
+</script>
+{% endblock %}
